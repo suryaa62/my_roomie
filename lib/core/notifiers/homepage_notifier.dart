@@ -11,7 +11,8 @@ class HomepageNotifier extends ChangeNotifier {
     authService.addListner(
         loggedin: loggedin,
         loggedOut: loggedOut,
-        emailVerification: emailVerifying);
+        emailVerification: emailVerifying,
+        busy: this.busy);
     dbService = Fstore();
   }
   late FAuth authService;
@@ -26,12 +27,13 @@ class HomepageNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void loggedin() async {
-    state = AuthState.loggedin;
+  Future<void> loggedin() async {
     if (user == null) {
       String uid = authService.getUid();
       user = await dbService.getUserDetails(uid);
     }
+    state = AuthState.loggedin;
+
     notifyListeners();
   }
 

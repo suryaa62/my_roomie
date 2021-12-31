@@ -7,10 +7,12 @@ class FAuth {
   }
 
   void addListner(
-      {required VoidCallback loggedin,
+      {required Future<void> Function() loggedin,
       required VoidCallback loggedOut,
-      required VoidCallback emailVerification}) {
+      required VoidCallback emailVerification,
+      required void Function(bool) busy}) {
     auth.userChanges().listen((User? user) async {
+      busy(true);
       if (user == null) {
         loggedOut();
       } else {
@@ -18,9 +20,10 @@ class FAuth {
           emailVerification();
           await user.sendEmailVerification();
         } else {
-          loggedin();
+          await loggedin();
         }
       }
+      busy(false);
     });
   }
 
