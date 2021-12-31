@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_roomie/ui/components/avatar.dart';
 import 'package:my_roomie/ui/components/text_input.dart';
+import 'package:my_roomie/ui/layout/theme.dart';
+import 'package:provider/provider.dart';
+import 'package:string_validator/string_validator.dart';
 
 class SignUpView extends StatefulWidget {
   SignUpView({Key? key, required this.signInSubmit, required this.signUpSubmit})
@@ -13,7 +17,7 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
-  GlobalKey _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool signup = true;
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
@@ -21,6 +25,7 @@ class _SignUpViewState extends State<SignUpView> {
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _blockController = TextEditingController();
   TextEditingController _roomController = TextEditingController();
+  int id = 1;
 
   @override
   void dispose() {
@@ -37,18 +42,31 @@ class _SignUpViewState extends State<SignUpView> {
           ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: Center(child: Avatar(radius: 50)),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.1,
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(33.0),
-                  child: Text(
-                    "Sign Up",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1!
-                        .copyWith(fontSize: 29),
+                  padding: const EdgeInsets.only(top: 0),
+                  child: Center(
+                      child: Consumer<ThemeNotifier>(
+                    builder: (context, value, child) => Avatar(
+                      radius: 50,
+                      id: value.currentTheme.id,
+                      callback: value.changeTheme,
+                      color: value.currentTheme.primary,
+                    ),
+                  )),
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(33.0),
+                    child: Text(
+                      "Sign Up",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText1!
+                          .copyWith(fontSize: 29),
+                    ),
                   ),
                 ),
                 Padding(
@@ -62,6 +80,14 @@ class _SignUpViewState extends State<SignUpView> {
                       "Name ",
                       style: Theme.of(context).textTheme.bodyText1!,
                     )),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter your name.";
+                      } else if (!isAlpha(value.replaceAll(RegExp(r' '), ''))) {
+                        return "Name should only have alphabets";
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
@@ -75,6 +101,16 @@ class _SignUpViewState extends State<SignUpView> {
                       "VIT Email ",
                       style: Theme.of(context).textTheme.bodyText1!,
                     )),
+                    validator: (value) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          !isEmail(value) ||
+                          !value.endsWith('@vitstudent.ac.in')) {
+                        return "Please enter your VIT email.";
+                      }
+
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
@@ -90,6 +126,13 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                     ),
                     obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter password.";
+                      }
+
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
@@ -103,6 +146,22 @@ class _SignUpViewState extends State<SignUpView> {
                       "Phone ",
                       style: Theme.of(context).textTheme.bodyText1!,
                     )),
+                    buildCounter: (context,
+                            {required currentLength,
+                            required isFocused,
+                            maxLength}) =>
+                        null,
+                    maxLength: 10,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter your phone number.";
+                      } else if (!RegExp(r"^[6-9]\d{9}$").hasMatch(value)) {
+                        return "Please enter valid Indian number.";
+                      }
+
+                      return null;
+                    },
                   ),
                 ),
                 Row(
@@ -112,15 +171,31 @@ class _SignUpViewState extends State<SignUpView> {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(11, 11, 8, 11),
                         child: TextFormField(
-                            controller: _blockController,
-                            style: Theme.of(context).textTheme.bodyText1,
-                            cursorColor: Colors.black,
-                            decoration: InputDecoration(
-                              label: Text(
-                                "Block ",
-                                style: Theme.of(context).textTheme.bodyText1!,
-                              ),
-                            )),
+                          controller: _blockController,
+                          style: Theme.of(context).textTheme.bodyText1,
+                          cursorColor: Colors.black,
+                          decoration: InputDecoration(
+                            label: Text(
+                              "Block ",
+                              style: Theme.of(context).textTheme.bodyText1!,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter block";
+                            } else if (!isAlpha(value)) {
+                              return "Block can only contain letter";
+                            }
+
+                            return null;
+                          },
+                          maxLength: 3,
+                          buildCounter: (context,
+                                  {required currentLength,
+                                  required isFocused,
+                                  maxLength}) =>
+                              null,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -136,6 +211,24 @@ class _SignUpViewState extends State<SignUpView> {
                             "Room No. ",
                             style: Theme.of(context).textTheme.bodyText1!,
                           )),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter room number.";
+                            } else if (!isNumeric(value)) {
+                              return "Enter only number";
+                            }
+
+                            return null;
+                          },
+                          buildCounter: (context,
+                                  {required currentLength,
+                                  required isFocused,
+                                  maxLength}) =>
+                              null,
+                          maxLength: 4,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
                         ),
                       ),
                     ),
@@ -152,13 +245,17 @@ class _SignUpViewState extends State<SignUpView> {
                           backgroundColor:
                               MaterialStateProperty.all(Colors.black)),
                       onPressed: () {
-                        widget.signUpSubmit(
-                            _emailController.text,
-                            _passwordController.text,
-                            _nameController.text,
-                            _phoneController.text,
-                            _blockController.text,
-                            _roomController.text);
+                        if (_formKey.currentState!.validate())
+                          widget.signUpSubmit(
+                              _emailController.text,
+                              _passwordController.text,
+                              _nameController.text,
+                              _phoneController.text,
+                              _blockController.text,
+                              _roomController.text,
+                              Provider.of<ThemeNotifier>(context, listen: false)
+                                  .currentTheme
+                                  .id);
                       },
                       child: Container(
                           width: double.infinity,
@@ -216,9 +313,20 @@ class _SignUpViewState extends State<SignUpView> {
           : Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.2,
+                ),
                 Padding(
                   padding: const EdgeInsets.all(0.0),
-                  child: Center(child: Avatar(radius: 50)),
+                  child: Center(
+                      child: Consumer<ThemeNotifier>(
+                    builder: (context, value, child) => Avatar(
+                      radius: 50,
+                      id: value.currentTheme.id,
+                      callback: value.changeTheme,
+                      color: value.currentTheme.primary,
+                    ),
+                  )),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(33.0),
@@ -241,11 +349,22 @@ class _SignUpViewState extends State<SignUpView> {
                       "VIT Email ",
                       style: Theme.of(context).textTheme.bodyText1!,
                     )),
+                    validator: (value) {
+                      if (value == null ||
+                          value.isEmpty ||
+                          !isEmail(value) ||
+                          !value.endsWith('@vitstudent.ac.in')) {
+                        return "Please enter your VIT email.";
+                      }
+
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(11.0),
                   child: TextFormField(
+                    obscureText: true,
                     controller: _passwordController,
                     cursorColor: Colors.black,
                     style: Theme.of(context).textTheme.bodyText1,
@@ -255,6 +374,13 @@ class _SignUpViewState extends State<SignUpView> {
                         style: Theme.of(context).textTheme.bodyText1!,
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter password.";
+                      }
+
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
@@ -268,8 +394,9 @@ class _SignUpViewState extends State<SignUpView> {
                           backgroundColor:
                               MaterialStateProperty.all(Colors.black)),
                       onPressed: () {
-                        widget.signInSubmit(
-                            _emailController.text, _passwordController.text);
+                        if (_formKey.currentState!.validate())
+                          widget.signInSubmit(
+                              _emailController.text, _passwordController.text);
                       },
                       child: Container(
                           width: double.infinity,

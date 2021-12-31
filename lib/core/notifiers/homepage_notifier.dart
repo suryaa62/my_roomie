@@ -48,11 +48,11 @@ class HomepageNotifier extends ChangeNotifier {
   }
 
   void signup(String email, String password, String name, String phone_no,
-      String block, String room_no) async {
+      String block, String room_no, int id) async {
     busy(true);
     String uid = await authService.signup(email, password);
     user = User(
-        avatar_id: 1,
+        avatar_id: id,
         email: email,
         phone_no: phone_no,
         name: name,

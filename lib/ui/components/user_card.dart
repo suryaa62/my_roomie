@@ -23,8 +23,9 @@ class Usercard extends StatelessWidget {
               width: 78,
               height: 78,
               child: CircleAvatar(
-                backgroundColor: Colors.blue,
-              ),
+                  backgroundColor: Colors.blue,
+                  foregroundImage:
+                      AssetImage('lib/assets/avatar_${user.avatar_id}.png')),
             ),
             Padding(
               padding: const EdgeInsets.only(right: 50),
