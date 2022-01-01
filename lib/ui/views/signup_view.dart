@@ -3,14 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:my_roomie/ui/components/avatar.dart';
 import 'package:my_roomie/ui/components/text_input.dart';
 import 'package:my_roomie/ui/layout/theme.dart';
+import 'package:my_roomie/ui/views/gender.dart';
 import 'package:provider/provider.dart';
 import 'package:string_validator/string_validator.dart';
 
 class SignUpView extends StatefulWidget {
   SignUpView({Key? key, required this.signInSubmit, required this.signUpSubmit})
       : super(key: key);
-  dynamic signUpSubmit;
-  void Function(String, String) signInSubmit;
+  Future<void> Function(
+          String, String, String, String, String, String, int, bool, String)
+      signUpSubmit;
+  Future<void> Function(String, String) signInSubmit;
 
   @override
   State<SignUpView> createState() => _SignUpViewState();
@@ -26,6 +29,9 @@ class _SignUpViewState extends State<SignUpView> {
   TextEditingController _blockController = TextEditingController();
   TextEditingController _roomController = TextEditingController();
   int id = 1;
+  bool _isAnnex = false;
+  String value = "None";
+  bool _showError = false;
 
   @override
   void dispose() {
@@ -71,25 +77,63 @@ class _SignUpViewState extends State<SignUpView> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(11.0),
-                  child: TextFormField(
-                    style: Theme.of(context).textTheme.bodyText1,
-                    cursorColor: Colors.black,
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                        label: Text(
-                      "Name ",
-                      style: Theme.of(context).textTheme.bodyText1!,
-                    )),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter your name.";
-                      } else if (!isAlpha(value.replaceAll(RegExp(r' '), ''))) {
-                        return "Name should only have alphabets";
-                      }
-                      return null;
-                    },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 8,
+                        child: TextFormField(
+                          textCapitalization: TextCapitalization.words,
+                          style: Theme.of(context).textTheme.bodyText1,
+                          cursorColor: Colors.black,
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                              label: Text(
+                            "Name ",
+                            style: Theme.of(context).textTheme.bodyText1!,
+                          )),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter your name.";
+                            } else if (!isAlpha(
+                                value.replaceAll(RegExp(r' '), ''))) {
+                              return "Name should only have alphabets";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 11),
+                            child: GenderRadio(
+                              callback: (s) {
+                                value = s;
+                              },
+                              primary: Provider.of<ThemeNotifier>(context)
+                                  .currentTheme
+                                  .primary,
+                              secondary: Provider.of<ThemeNotifier>(context)
+                                  .currentTheme
+                                  .secondary,
+                            )),
+                      )
+                    ],
                   ),
                 ),
+                if (_showError)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 23),
+                      child: Text(
+                        "Please select gender",
+                        style:
+                            TextStyle(color: Colors.red.shade800, fontSize: 12),
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(11.0),
                   child: TextFormField(
@@ -167,11 +211,12 @@ class _SignUpViewState extends State<SignUpView> {
                 Row(
                   children: [
                     Expanded(
-                      flex: 60,
+                      flex: 30,
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(11, 11, 8, 11),
                         child: TextFormField(
                           controller: _blockController,
+                          textCapitalization: TextCapitalization.characters,
                           style: Theme.of(context).textTheme.bodyText1,
                           cursorColor: Colors.black,
                           decoration: InputDecoration(
@@ -199,10 +244,11 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                     ),
                     Expanded(
-                      flex: 40,
+                      flex: 30,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 11, 11, 11),
+                        padding: const EdgeInsets.fromLTRB(8, 11, 8, 11),
                         child: TextFormField(
+                          textCapitalization: TextCapitalization.characters,
                           controller: _roomController,
                           style: Theme.of(context).textTheme.bodyText1,
                           cursorColor: Colors.black,
@@ -232,6 +278,25 @@ class _SignUpViewState extends State<SignUpView> {
                         ),
                       ),
                     ),
+                    Checkbox(
+                      value: _isAnnex,
+                      onChanged: (bool? v) {
+                        setState(() {
+                          _isAnnex = v!;
+                        });
+                      },
+                      fillColor: MaterialStateProperty.all(
+                          Provider.of<ThemeNotifier>(context)
+                              .currentTheme
+                              .primary),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 11, 20, 11),
+                      child: Text(
+                        "Annex",
+                        style: Theme.of(context).textTheme.bodyText1!,
+                      ),
+                    )
                   ],
                 ),
                 Padding(
@@ -245,17 +310,32 @@ class _SignUpViewState extends State<SignUpView> {
                           backgroundColor:
                               MaterialStateProperty.all(Colors.black)),
                       onPressed: () {
-                        if (_formKey.currentState!.validate())
-                          widget.signUpSubmit(
-                              _emailController.text,
-                              _passwordController.text,
-                              _nameController.text,
-                              _phoneController.text,
-                              _blockController.text,
-                              _roomController.text,
-                              Provider.of<ThemeNotifier>(context, listen: false)
-                                  .currentTheme
-                                  .id);
+                        if (_formKey.currentState!.validate() &&
+                            value != 'None') {
+                          widget
+                              .signUpSubmit(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  _nameController.text,
+                                  _phoneController.text,
+                                  _blockController.text.toUpperCase(),
+                                  _roomController.text.toUpperCase(),
+                                  Provider.of<ThemeNotifier>(context,
+                                          listen: false)
+                                      .currentTheme
+                                      .id,
+                                  _isAnnex,
+                                  value)
+                              .catchError((e) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red));
+                          });
+                        } else if (value == 'None') {
+                          setState(() {
+                            _showError = true;
+                          });
+                        }
                       },
                       child: Container(
                           width: double.infinity,
@@ -395,8 +475,15 @@ class _SignUpViewState extends State<SignUpView> {
                               MaterialStateProperty.all(Colors.black)),
                       onPressed: () {
                         if (_formKey.currentState!.validate())
-                          widget.signInSubmit(
-                              _emailController.text, _passwordController.text);
+                          widget
+                              .signInSubmit(_emailController.text,
+                                  _passwordController.text)
+                              .catchError((e) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(e.toString()),
+                              backgroundColor: Colors.red,
+                            ));
+                          });
                       },
                       child: Container(
                           width: double.infinity,

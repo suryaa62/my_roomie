@@ -5,7 +5,9 @@ class User {
       required this.avatar_id,
       required this.room_id,
       required this.phone_no,
-      required this.uid});
+      required this.uid,
+      required this.gender,
+      required this.isAnnex});
 
   String name;
   String email;
@@ -13,6 +15,8 @@ class User {
   String room_id;
   String phone_no;
   String uid;
+  String gender;
+  bool isAnnex;
 
   Map<String, dynamic> toMap() {
     return {
@@ -22,6 +26,8 @@ class User {
       "room_id": room_id,
       "phone": phone_no,
       "uid": uid,
+      "gender": gender,
+      "annex": isAnnex,
     };
   }
 
@@ -32,6 +38,8 @@ class User {
         name: m['name'],
         phone_no: m['phone'],
         room_id: m['room_id'],
-        uid: m['uid']);
+        uid: m['uid'],
+        gender: m['gender'],
+        isAnnex: m['annex']);
   }
 }

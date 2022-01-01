@@ -26,8 +26,10 @@ class ThemeNotifier extends ChangeNotifier {
 
   void setCurrentTheme(int x) {
     x = x % 5;
-    _currentTheme = x;
-    notifyListeners();
+    if (_currentTheme != x) {
+      _currentTheme = x;
+      // notifyListeners();
+    }
   }
 
   void changeTheme() {

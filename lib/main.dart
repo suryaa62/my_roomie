@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:my_roomie/core/models/room.dart';
+import 'package:my_roomie/core/models/room_member.dart';
 import 'package:my_roomie/core/models/user.dart';
 import 'package:my_roomie/core/notifiers/homepage_notifier.dart';
 import 'package:my_roomie/ui/components/text_input.dart';
@@ -132,8 +133,8 @@ class Homepage extends StatelessWidget {
                       ],
                     );
                   }
-                  Provider.of<ThemeNotifier>(context)
-                      .setCurrentTheme(notifier.user!.avatar_id);
+                  Provider.of<ThemeNotifier>(context, listen: false)
+                      .setCurrentTheme(notifier.user!.avatar_id - 1);
                   return StreamBuilder<DocumentSnapshot>(
                     stream: notifier.getRoom(),
                     builder: (context, snapshot) {
@@ -151,66 +152,69 @@ class Homepage extends StatelessWidget {
 
                       Room room = Room.fromMap(
                           snapshot.data!.data() as Map<String, dynamic>);
-                      List<User> users = room.users;
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      List<RoomMember> users = room.users;
+                      return ListView(
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Header(
-                              room: notifier.user!.room_id,
+                              room: room.block + " - " + room.number,
                               userName: notifier.user!.name,
                               id: notifier.user!.avatar_id),
-                          Column(
-                            children: [
-                              SizedBox(
-                                height: 300,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 18, right: 33),
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: users.length,
-                                    itemBuilder: (context, index) {
-                                      if (users[index].uid ==
-                                          notifier.user!.uid)
-                                        return Container();
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15),
-                                        child: Usercard(user: users[index]),
-                                      );
-                                    },
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 300,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 18, right: 33),
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: users.length,
+                                      itemBuilder: (context, index) {
+                                        if (users[index].uid ==
+                                            notifier.user!.uid)
+                                          return Container();
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15),
+                                          child: Usercard(user: users[index]),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 33.0, vertical: 22),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "${users.length - 1} room ${(users.length - 1 >= 1) ? "mate" : "mates"} found",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1!
-                                          .copyWith(fontSize: 30),
-                                    ),
-                                    // FloatingActionButton(
-                                    //   onPressed: () {},
-                                    //   child: Icon(
-                                    //     Icons.arrow_forward,
-                                    //     color: Colors.white,
-                                    //   ),
-                                    //   backgroundColor: Colors.black,
-                                    // )
-                                  ],
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 33.0, vertical: 22),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "${users.length - 1} room ${(users.length - 1 >= 1) ? "mates" : "mate"} found",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1!
+                                            .copyWith(fontSize: 30),
+                                      ),
+                                      // FloatingActionButton(
+                                      //   onPressed: () {},
+                                      //   child: Icon(
+                                      //     Icons.arrow_forward,
+                                      //     color: Colors.white,
+                                      //   ),
+                                      //   backgroundColor: Colors.black,
+                                      // )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 33),
+                            padding: const EdgeInsets.only(bottom: 20, top: 50),
                             child: SizedBox(
                               width: 300,
                               child: Text(

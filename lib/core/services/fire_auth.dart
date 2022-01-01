@@ -12,16 +12,21 @@ class FAuth {
       required VoidCallback emailVerification,
       required void Function(bool) busy}) {
     auth.userChanges().listen((User? user) async {
-      busy(true);
-      if (user == null) {
-        loggedOut();
-      } else {
-        if (!user.emailVerified) {
-          emailVerification();
-          await user.sendEmailVerification();
+      try {
+        busy(true);
+        if (user == null) {
+          loggedOut();
         } else {
-          await loggedin();
+          if (!user.emailVerified) {
+            await user.sendEmailVerification();
+
+            emailVerification();
+          } else {
+            await loggedin();
+          }
         }
+      } catch (e) {
+        print(e);
       }
       busy(false);
     });
@@ -47,16 +52,18 @@ class FAuth {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       return userCredential.user!.uid;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
-    } catch (e) {
-      print(e);
     }
-    throw Exception("Some Error");
+    // on FirebaseAuthException catch (e) {
+    //   if (e.code == 'weak-password') {
+    //     print('The password provided is too weak.');
+    //   } else if (e.code == 'email-already-in-use') {
+    //     print('The account already exists for that email.');
+    //   }
+    // }
+    catch (e) {
+      rethrow;
+    }
+    // throw Exception("Some Error");
   }
 
   Future<String> signin(String email, String password) async {
@@ -64,15 +71,8 @@ class FAuth {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       return userCredential.user!.uid;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-      }
     } catch (e) {
-      print(e);
+      rethrow;
     }
-    throw Exception("Some Error");
   }
 }

@@ -14,22 +14,30 @@ class Fstore {
   late Stream<DocumentSnapshot> _roomDocstream;
 
   Future<void> addUser(User user, Room room) async {
-    await _users.doc(user.uid).set(user.toMap());
-    DocumentSnapshot doc = await _rooms.doc(user.room_id).get();
-    if (doc.exists) {
-      await _rooms.doc(user.room_id).update({
-        'users': FieldValue.arrayUnion([user.toMap()])
-      });
-    } else {
-      await _rooms.doc(user.room_id).set(room.toMap());
+    try {
+      await _users.doc(user.uid).set(user.toMap());
+      DocumentSnapshot doc = await _rooms.doc(user.room_id).get();
+      if (doc.exists) {
+        await _rooms.doc(user.room_id).update({
+          'users': FieldValue.arrayUnion([user.toMap()])
+        });
+      } else {
+        await _rooms.doc(user.room_id).set(room.toMap());
+      }
+      // _roomDocstream = db.collection('rooms').doc(user.room_id).snapshots();
+    } catch (e) {
+      rethrow;
     }
-    // _roomDocstream = db.collection('rooms').doc(user.room_id).snapshots();
   }
 
   Future<User> getUserDetails(String uid) async {
-    DocumentSnapshot doc = await _users.doc(uid).get();
-    User user = User.fromMap(doc.data() as Map<String, dynamic>);
-    return user;
+    try {
+      DocumentSnapshot doc = await _users.doc(uid).get();
+      User user = User.fromMap(doc.data() as Map<String, dynamic>);
+      return user;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Stream<DocumentSnapshot> roomStream(String room_id) {

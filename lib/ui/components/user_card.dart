@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:my_roomie/core/models/room_member.dart';
 import 'package:my_roomie/core/models/user.dart';
 
 class Usercard extends StatelessWidget {
   const Usercard({Key? key, required this.user}) : super(key: key);
-  final User user;
+  final RoomMember user;
 
   @override
   Widget build(BuildContext context) {
