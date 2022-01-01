@@ -169,20 +169,48 @@ class Homepage extends StatelessWidget {
                                   child: Padding(
                                     padding: const EdgeInsets.only(
                                         left: 18, right: 33),
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: users.length,
-                                      itemBuilder: (context, index) {
-                                        if (users[index].uid ==
-                                            notifier.user!.uid)
-                                          return Container();
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 15),
-                                          child: Usercard(user: users[index]),
-                                        );
-                                      },
-                                    ),
+                                    child: (users.length - 1 == 0)
+                                        ? Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                  width: 128,
+                                                  height: 128,
+                                                  child: CircleAvatar(
+                                                    radius: 64,
+                                                    foregroundImage: AssetImage(
+                                                        'lib/assets/sad_cat.png'),
+                                                  )),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Text(
+                                                  "Don't worry!!!\nShare the website to find your room mates.",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1!
+                                                      .copyWith(fontSize: 25),
+                                                ),
+                                              )
+                                            ],
+                                          )
+                                        : ListView.builder(
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: users.length,
+                                            itemBuilder: (context, index) {
+                                              if (users[index].uid ==
+                                                  notifier.user!.uid)
+                                                return Container();
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 15),
+                                                child: Usercard(
+                                                    user: users[index]),
+                                              );
+                                            },
+                                          ),
                                   ),
                                 ),
                                 Padding(
