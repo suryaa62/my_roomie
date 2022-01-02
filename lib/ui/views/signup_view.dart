@@ -1,6 +1,8 @@
+import 'package:adaptic/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_roomie/ui/components/avatar.dart';
+
 import 'package:my_roomie/ui/components/text_input.dart';
 import 'package:my_roomie/ui/layout/theme.dart';
 import 'package:my_roomie/ui/views/gender.dart';
@@ -42,6 +44,7 @@ class _SignUpViewState extends State<SignUpView> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Form(
       key: _formKey,
       child: (signup)
@@ -49,7 +52,10 @@ class _SignUpViewState extends State<SignUpView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.1,
+                  height: AdaptiveIfScreen(
+                      context: context,
+                      ifNotSpecified: size.height * 0.1,
+                      ifSmall: 0),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 0),
@@ -82,6 +88,7 @@ class _SignUpViewState extends State<SignUpView> {
                       Expanded(
                         flex: 8,
                         child: TextFormField(
+                          keyboardType: TextInputType.name,
                           textCapitalization: TextCapitalization.words,
                           style: Theme.of(context).textTheme.bodyText1,
                           cursorColor: Colors.black,
@@ -102,22 +109,19 @@ class _SignUpViewState extends State<SignUpView> {
                           },
                         ),
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                            padding: EdgeInsets.only(left: 11),
-                            child: GenderRadio(
-                              callback: (s) {
-                                value = s;
-                              },
-                              primary: Provider.of<ThemeNotifier>(context)
-                                  .currentTheme
-                                  .primary,
-                              secondary: Provider.of<ThemeNotifier>(context)
-                                  .currentTheme
-                                  .secondary,
-                            )),
-                      )
+                      Padding(
+                          padding: EdgeInsets.only(left: 11),
+                          child: GenderRadio(
+                            callback: (s) {
+                              value = s;
+                            },
+                            primary: Provider.of<ThemeNotifier>(context)
+                                .currentTheme
+                                .primary,
+                            secondary: Provider.of<ThemeNotifier>(context)
+                                .currentTheme
+                                .secondary,
+                          )),
                     ],
                   ),
                 ),
@@ -234,7 +238,7 @@ class _SignUpViewState extends State<SignUpView> {
 
                             return null;
                           },
-                          maxLength: 3,
+                          maxLength: 1,
                           buildCounter: (context,
                                   {required currentLength,
                                   required isFocused,
@@ -312,11 +316,15 @@ class _SignUpViewState extends State<SignUpView> {
                       onPressed: () {
                         if (_formKey.currentState!.validate() &&
                             value != 'None') {
+                          String s = _nameController.text.splitMapJoin(" ",
+                              onNonMatch: (String s) =>
+                                  s[0].toUpperCase() + s.substring(1));
+                          //print(s);
                           widget
                               .signUpSubmit(
                                   _emailController.text,
                                   _passwordController.text,
-                                  _nameController.text,
+                                  s,
                                   _phoneController.text,
                                   _blockController.text.toUpperCase(),
                                   _roomController.text.toUpperCase(),
@@ -393,9 +401,7 @@ class _SignUpViewState extends State<SignUpView> {
           : Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.2,
-                ),
+                SizedBox(height: (size.height - 576.2) / 2),
                 Padding(
                   padding: const EdgeInsets.all(0.0),
                   child: Center(

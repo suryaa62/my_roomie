@@ -24,7 +24,7 @@ class Fstore {
       } else {
         await _rooms.doc(user.room_id).set(room.toMap());
       }
-      // _roomDocstream = db.collection('rooms').doc(user.room_id).snapshots();
+      _roomDocstream = db.collection('rooms').doc(user.room_id).snapshots();
     } catch (e) {
       rethrow;
     }
@@ -34,6 +34,7 @@ class Fstore {
     try {
       DocumentSnapshot doc = await _users.doc(uid).get();
       User user = User.fromMap(doc.data() as Map<String, dynamic>);
+      _roomDocstream = db.collection('rooms').doc(user.room_id).snapshots();
       return user;
     } catch (e) {
       rethrow;
@@ -41,7 +42,7 @@ class Fstore {
   }
 
   Stream<DocumentSnapshot> roomStream(String room_id) {
-    _roomDocstream = _rooms.doc(room_id).snapshots();
+    //_roomDocstream = _rooms.doc(room_id).snapshots();
     return _roomDocstream;
   }
 }

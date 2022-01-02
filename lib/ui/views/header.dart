@@ -1,3 +1,4 @@
+import 'package:adaptic/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:my_roomie/ui/components/avatar.dart';
 import 'package:my_roomie/ui/components/room_title.dart';
@@ -16,38 +17,87 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Stack(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return AdaptiveIfScreen(
+        context: context,
+        ifNotSpecified: Stack(
           children: [
-            Logo(),
-            Expanded(
-              child: SizedBox(),
-              flex: 50,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Logo(),
+                Expanded(
+                  child: SizedBox(),
+                  flex: 50,
+                ),
+                // Avatar(radius: 50),
+                // Expanded(
+                //   child: SizedBox(),
+                //   flex: 50,
+                // ),
+                RoomTitle(room: room, userName: userName),
+              ],
             ),
-            // Avatar(radius: 50),
-            // Expanded(
-            //   child: SizedBox(),
-            //   flex: 50,
-            // ),
-            RoomTitle(room: room, userName: userName),
+            Positioned(
+                top: 33,
+                left: size.width / 2 - 50,
+                child: Align(
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        foregroundImage:
+                            AssetImage('lib/assets/avatar_$id.png')),
+                  ),
+                  alignment: Alignment.center,
+                )),
           ],
         ),
-        Positioned(
-            top: 33,
-            left: size.width / 2 - 50,
-            child: Align(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    foregroundImage: AssetImage('lib/assets/avatar_$id.png')),
+        ifSmall: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Logo(), RoomTitle(room: room, userName: userName)],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Divider(
+                    color: Colors.black,
+                  ),
+                )),
+                SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircleAvatar(
+                      backgroundColor: Colors.blue,
+                      foregroundImage: AssetImage('lib/assets/avatar_$id.png')),
+                ),
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Divider(
+                    color: Colors.black,
+                  ),
+                )),
+              ],
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  "${userName}'s room",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText1!
+                      .copyWith(fontSize: 20),
+                ),
               ),
-              alignment: Alignment.center,
-            )),
-      ],
-    );
+            ),
+          ],
+        ));
   }
 }

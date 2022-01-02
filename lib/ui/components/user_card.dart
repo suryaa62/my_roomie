@@ -1,3 +1,4 @@
+import 'package:adaptic/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:my_roomie/core/models/room_member.dart';
 import 'package:my_roomie/core/models/user.dart';
@@ -21,27 +22,31 @@ class Usercard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 78,
-              height: 78,
+              width: AdaptiveIfScreen<double>(
+                  context: context, ifNotSpecified: 78, ifSmall: 60),
+              height: AdaptiveIfScreen<double>(
+                  context: context, ifNotSpecified: 78, ifSmall: 60),
               child: CircleAvatar(
                   backgroundColor: Colors.blue,
                   foregroundImage:
                       AssetImage('lib/assets/avatar_${user.avatar_id}.png')),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 50),
+              padding: EdgeInsets.only(
+                  right: AdaptiveIfScreen<double>(
+                      context: context, ifNotSpecified: 50, ifSmall: 0)),
               child: Text(
                 user.name,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1!
-                    .copyWith(fontSize: 36),
+                style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                    fontSize: AdaptiveIfScreen<double>(
+                        context: context, ifNotSpecified: 36, ifSmall: 30)),
               ),
             ),
             Text(
               user.phone_no,
-              style:
-                  Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 29),
+              style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                  fontSize: AdaptiveIfScreen<double>(
+                      context: context, ifNotSpecified: 29, ifSmall: 22)),
             )
           ],
         ),
